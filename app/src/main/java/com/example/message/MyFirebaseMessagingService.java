@@ -18,12 +18,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        // FCM 메시지에서 title과 body 가져오기
-        String title = remoteMessage.getNotification() != null ? remoteMessage.getNotification().getTitle() : "No Title";
-        String body = remoteMessage.getNotification() != null ? remoteMessage.getNotification().getBody() : "No Body";
-
-        // 메시지가 포함된 알림을 보냄
-        sendNotification(title, body);
+        // FCM 메시지가 notification을 포함하면 알림을 자동 처리
+        if (remoteMessage.getNotification() != null) {
+            String title = remoteMessage.getNotification().getTitle();
+            String body = remoteMessage.getNotification().getBody();
+            sendNotification(title, body);  // 알림을 수동으로 처리
+        }
     }
 
     private void sendNotification(String title, String body) {
