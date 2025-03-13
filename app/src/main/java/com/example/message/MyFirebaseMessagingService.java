@@ -1,5 +1,6 @@
 package com.example.message;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -51,7 +52,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentIntent(pendingIntent)  // 알림 클릭 시 실행될 인텐트
                         .setPriority(NotificationCompat.PRIORITY_HIGH) // 우선순위 높음 (상단 알림)
                         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // 알림 내용을 공개적으로 표시
-                        .setFullScreenIntent(pendingIntent, true); // Full-screen 팝업 알림
+                        .setFullScreenIntent(pendingIntent, true)  // Full-screen 팝업 알림
+                        .setCategory(NotificationCompat.CATEGORY_ALARM); // 알람 카테고리 설정 (알람으로 인식)
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -62,6 +64,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     "Default Channel",  // 채널 이름
                     NotificationManager.IMPORTANCE_HIGH);  // 알림의 중요도 설정
             channel.setDescription("Default channel for notifications");
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);  // 잠금화면에서도 공개적으로 표시
             notificationManager.createNotificationChannel(channel);
         }
 
