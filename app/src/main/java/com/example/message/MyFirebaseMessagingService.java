@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -18,6 +15,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // FCM 메시지에서 title과 body 가져오기
@@ -29,15 +27,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void sendNotification(String title, String body) {
-        // Toast로 title과 body 출력
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                // Toast 메시지를 화면에 표시
-                Toast.makeText(MyFirebaseMessagingService.this, "Title: " + title + "\nBody: " + body, Toast.LENGTH_SHORT).show();
-            }
-        });
-
         // Intent to launch MainActivity when the notification is clicked
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -48,18 +37,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        String channelId = "My_channel_id";
+        String channelId = "default_channel"; // Firebase에서 설정한 채널 ID와 동일하게 설정
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         // NotificationCompat.Builder 사용하여 알림을 구성
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(android.R.drawable.ic_notification_overlay) // 사용자 정의 아이콘 사용
+                        .setSmallIcon(R.mipmap.ic_launcher)  // drawable 폴더에 저장된 아이콘 사용
                         .setContentTitle(title)  // FCM에서 받은 title 사용
                         .setContentText(body)    // FCM에서 받은 body 사용
                         .setAutoCancel(true)     // 클릭 시 자동으로 알림이 제거됨
                         .setSound(defaultSoundUri) // 기본 알림 소리
-                        .setContentIntent(pendingIntent);  // 알림 클릭 시 실행될 인텐트
+                        .setContentIntent(pendingIntent)  // 알림 클릭 시 실행될 인텐트
+                        .setPriority(NotificationCompat.PRIORITY_HIGH) // 우선순위 높음 (상단 알림)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // 알림 내용을 공개적으로 표시
+                        .setFullScreenIntent(pendingIntent, true); // Full-screen 팝업 알림
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -67,13 +59,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Android Oreo 이상에서는 알림 채널이 필요합니다.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
-                    "Channel human readable title",  // 채널 이름
-                    NotificationManager.IMPORTANCE_DEFAULT);  // 알림 중요도
+                    "Default Channel",  // 채널 이름
+                    NotificationManager.IMPORTANCE_HIGH);  // 알림의 중요도 설정
+            channel.setDescription("Default channel for notifications");
             notificationManager.createNotificationChannel(channel);
         }
 
         // 알림을 화면에 표시
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
-
 }
